@@ -2,7 +2,8 @@
 ;; Also a test for the GitHub platform
 ;; Supposed to go on the Hello World repository
 ;; mais uma altera
-;;lkjhlkjhlkjhlkj
+
+
 to setup
   ca ;; short for clear-all
   ask patches [
