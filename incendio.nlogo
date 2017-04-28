@@ -1,4 +1,6 @@
 ;; Related to the examples at the Wilensky and Rand book at kindle, position 2635
+;; Also a test for the GitHub platform
+;; Supposed to go on the Hello World repository
 
 to setup
   ca ;; short for clear-all
