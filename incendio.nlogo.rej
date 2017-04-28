@@ -1,0 +1,12 @@
+diff a/incendio.nlogo b/incendio.nlogo	(rejected hunks)
+@@ -108,8 +108,8 @@
+ GRAPHICS-WINDOW
+ 229
+ 10
+-438
+-220
++638
++420
+ -1
+ -1
+ 1.0
