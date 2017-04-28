@@ -1,12 +1,12 @@
-;; ver no kindle livro do wilensky a explicacao e por aqui pos 2635
+;; Related to the examples at the Wilensky and Rand book at kindle, position 2635
 
 to setup
   ca ;; short for clear-all
   ask patches [
-    ;; cria as arvores vivas com a densidade escolhida no slider
+    ;; creates a forest of live trees with density provided by the slider in the interface
     if (random 100) < densidade [
       set pcolor green]
-    ;; inicia um incendio no extremo esquerdo da floresta
+    ;; creates a line of burning tree in the left extreme of the forest
     if (pxcor = min-pxcor) [
       set pcolor red]
   ]
@@ -16,61 +16,69 @@ end
 
 
 to go
-  ;; para o programa quando não há mais arvores queimando
+  ;; stops the program when there is no more burning trees
   if all? patches [ pcolor != red ] [ stop ]
 
-  ;; se comunica com os incendios
+  ;; commands burning trees to spread the fire
   ;;ask patches with [pcolor = red ] [
   ask fire-patches [
       incendiar-vizinhos
       set pcolor brown
   ]
 
-  ;; para o relogio quando não há mais árvores queimando
+  ;; stops the clock when there are no more burning trees
   ;; if (one-of patches with [pcolor = red]) != nobody [tick ]
   tick
 
 end
 
-;; este é um reporter, que localiza os patches com a condição abaixo quando chamado
+;; this is a reporter that lists the patches with the condition bellow. These can be called upon
 to-report fire-patches
   report patches with [ pcolor = red ]
 end
 
 to incendiar-vizinhos
+  ;; this asks a von neumman neighborhood (above, bellow, left and right) with green color
   ask neighbors4 with [pcolor = green] [
-    ;; inclui a probabilidade do fogo se espalhar para uma arvore vizinha
+    ;; includes the probability of the fire to spread
     ;; if (random 100 < probabilidade_fogo) [
     ;;  set pcolor red
 
-    ;; com a insercao do vento e da probabilidade do fogo queimar uma arvore vizinha
+    ;; creates a reviewed propbability given the wind strenght and direction
     let probabilidade probabilidade_fogo
 
 
-    ;; computa a direçao a partir de você (a arvore verde) para a arvore em chamas
-    ;; (ATENCAO "myself" é a árvore em chamas (patch em vermelho) que é quem solicita ao patch verde a execucao dos comandos. Aqui é tudo do ponto de vista do agente
-    let direcao towards myself ;; towards retorna o heading para um agente - myself é o agente que pergunta (no caso o patch vermelho)
-    ;;aparentemente é contado em graus a partir das 12 horas e em sentido horário
+    ;; computes the direction from you (the green tree) to the burning tree
+    ;; (NOTE: "myself" is the burning tree (the red patch) that asked you
+    ;; to execute commands)
+    let direcao towards myself ;; towards reports the heading to an agent
+    ;;aparently it is expressed in degrees, clockwise, starting at 12 o'clock
 
-    ;; a arvore queimando está a norte de voce (arvore verde)
-    ;; o vento sul (que vem do sul) impede que o fogo se espalhe até voce, reduzindo a probabilidade do fogo espalhar
+    ;; the burning tree (the red) is north of you (the green tree)
+    ;; so the south wind (positive south value) impedes the fire spreading to you
+    ;; so reduce the probability of spread
     if direcao = 0 [
       set probabilidade probabilidade - vento_sul
 
     ]
 
-    ;; a arvore queimando esta ao sul de voce
-    ;; o vento sul ajuda o fogo a se espalhar até voce, aumentando a probabilidade do fogo espalhar aumentando a probabilidade
+    ;; the burning tree is south of you
+    ;; so the south wind (positive south value) aids the fire spreading to you
+    ;; so increase the probability of spread
     if direcao = 180 [
       set probabilidade probabilidade + vento_sul
     ]
 
-    ;; a arvore queimando esta a leste de voce. O vento oeste impede o fogo de espalhar diminuindo a probabilidade
+    ;; the burning tree is east of you
+    ;; so the west wind (positive west) impedesthe fire spreading to you
+    ;; so reduce the probability of spread
     if direcao = 90 [
       set probabilidade probabilidade - vento_oeste
     ]
 
-    ;; a arvore queimando esta a oeste de voce. O vento oeste ajuda o fogo de espalhar aumentando a probabilidade
+    ;; the burning tree is west of you
+    ;; so the wet wind aids the fire spreading to you
+    ;; so increase the probability of spread
     if direcao = 270 [
       set probabilidade probabilidade + vento_oeste
     ]
@@ -78,9 +86,12 @@ to incendiar-vizinhos
     if random 100 < probabilidade [
       set pcolor red
 
+      ;; are there flying sparks?
       if big_jumps? [
 
-        ;; o patch-at indica quem é o patch a x y de quem pergunta, neste caso o verde. Se chega a borda e ela n se conecta ele responde nobody
+        ;; Reports the patch at (dx, dy) from the caller, that is, the patch containing the point dx east and dy patches north of this agent.
+        ;; If there is an edge in the world it may report "nobody"
+        ;; In this code it seeks a target that is at a distance proportional to the wind speed and direction
         let target patch-at (vento_oeste / 5 ) (vento_sul / 5 )
         if target != nobody and [pcolor] of target = green [
           ask target [
